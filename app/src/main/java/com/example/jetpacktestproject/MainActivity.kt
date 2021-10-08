@@ -36,11 +36,15 @@ import androidx.core.content.ContextCompat.startActivity
 import android.content.Intent
 import android.net.Uri
 import android.net.Uri.parse
+import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.URI
 import java.util.logging.Level.parse
 
@@ -48,12 +52,34 @@ import java.util.logging.Level.parse
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getDataFromApi()
         setContent {
             JetpackTestProjectTheme {
                 myCard()
             }
         }
     }
+
+    var repos : List<Repo>? = null
+
+    private fun getDataFromApi() {
+
+        ApiService.endpoint.getRepos()
+            .enqueue(object : Callback<List<Repo>>{
+                override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
+                    if (response.isSuccessful){
+                        repos = response.body()!!
+                    }
+                }
+
+                override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
+                    Log.e("error", t.localizedMessage)
+                }
+
+            })
+
+    }
+
 }
 
 @Composable
@@ -62,7 +88,11 @@ fun WebViewer(){
     Text(text = "https://github.com/peaanti", modifier = Modifier
         .padding(top = 1.dp)
         .clickable(onClick = {
-            startActivity(context, Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/peaanti")), null)
+            startActivity(
+                context,
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/peaanti")),
+                null
+            )
         }),
         fontSize = 18.sp)
 }
