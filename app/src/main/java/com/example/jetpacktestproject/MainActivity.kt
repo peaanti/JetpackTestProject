@@ -1,104 +1,77 @@
 package com.example.jetpacktestproject
 
-import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Button
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import com.example.jetpacktestproject.ui.theme.JetpackTestProjectTheme
-import kotlinx.coroutines.NonDisposableHandle.parent
-import androidx.core.content.ContextCompat.startActivity
-
-import android.content.Intent
-import android.net.Uri
-import android.net.Uri.parse
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.ContextCompat.startActivity
-import androidx.recyclerview.widget.RecyclerView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.net.URI
-import java.util.logging.Level.parse
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getDataFromApi()
         setContent {
             JetpackTestProjectTheme {
-                myCard()
+                ShowEverything()
             }
         }
     }
+}
 
-    var repos : List<Repo>? = null
+@Composable
+fun ShowEverything(){
+    val repos = Repos()
+    val getAllData = repos.getAllData()
+    Column() {
+        MyCard()
+        LazyColumn {
 
-    private fun getDataFromApi() {
-
-        ApiService.endpoint.getRepos()
-            .enqueue(object : Callback<List<Repo>>{
-                override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
-                    if (response.isSuccessful){
-                        repos = response.body()!!
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
-                    Log.e("error", t.localizedMessage)
-                }
-
-            })
-
+            items(items = getAllData) { repo ->
+                CustomItem(repo = repo)
+            }
+        }
     }
-
 }
 
 @Composable
-fun WebViewer(){
+fun WebViewer() {
     val context = LocalContext.current
-    Text(text = "https://github.com/peaanti", modifier = Modifier
-        .padding(top = 1.dp)
-        .clickable(onClick = {
-            startActivity(
-                context,
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/peaanti")),
-                null
-            )
-        }),
-        fontSize = 18.sp)
+    Text(
+        text = "https://github.com/peaanti", modifier = Modifier
+            .padding(top = 1.dp)
+            .clickable(onClick = {
+                startActivity(
+                    context,
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/peaanti")),
+                    null
+                )
+            }),
+        fontSize = 18.sp
+    )
 }
 
 @Composable
-fun myCard() {
+fun MyCard() {
     Row(
         modifier = Modifier
             .padding(7.dp)
@@ -147,17 +120,12 @@ fun myCard() {
             WebViewer()
         }
     }
-
-
-
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     JetpackTestProjectTheme {
-        myCard()
+        MyCard()
     }
 }
